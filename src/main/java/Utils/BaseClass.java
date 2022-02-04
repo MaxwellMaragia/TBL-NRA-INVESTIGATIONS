@@ -29,7 +29,7 @@ public class BaseClass {
 		FileInputStream fls = new FileInputStream("src\\test\\resources\\global.properties");
 		prop.load(fls);
 		
-		System.setProperty("webdriver.chrome.driver", "Browsers\\chromedriver_89.exe");
+		System.setProperty("webdriver.chrome.driver", "Browsers\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().window().maximize();
 
@@ -48,14 +48,12 @@ public class BaseClass {
 	
 	public static String todaysDate() {
 		LocalDate today = LocalDate.now();
-    	String formattedDate = today.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
-    	return formattedDate;
+		return today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
 	public static String tomorrowsDate() {
 		LocalDate today = LocalDate.now();
 		LocalDate tomorrow = today.plus(1, ChronoUnit.DAYS);
-    	String formattedDate = tomorrow.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-    	return formattedDate;
+		return tomorrow.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 	}
 
 	public static String getRandom(int n)

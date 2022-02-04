@@ -18,33 +18,22 @@ public class Hooks extends BaseClass {
 
 	public Scenario scenario = null;
 
-
 	@Before()
 	public void before(Scenario scenario) throws IOException {
-
 		this.scenario = scenario;
-
-
 	}
-
 
 	@After(order=1)
-
 	public void AfterSelenium()
-
 	{
-
-		//driver.close();
+//		driver.close();
 		System.out.println("Completed execution for the scenario :" + scenario.getName());
-
 	}
-
 
 	@After(order=2)
 	public void AftersaveScreenshot(Scenario scenario) {
 
 		File destPath;
-
 		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy_hh.mm.ss");
 		Date curDate = new Date(); String strDate = sdf.format(curDate);
 		File screenshot_with_scenario_name = (((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE));

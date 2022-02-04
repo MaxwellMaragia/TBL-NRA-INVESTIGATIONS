@@ -84,8 +84,7 @@ public class stepDefinitions extends BaseClass  {
     public String FirstName = "";
     public String SecondName = "";
     public String Email = "";
-    public String PenaltyCode = "";
-    public String FineCode = "";
+
 
     public stepDefinitions(sharedatastep sharedata) {
 
@@ -125,8 +124,13 @@ public class stepDefinitions extends BaseClass  {
     }
 
     public void switchToFrameBackoffice(){
-        WebElement frame = twenty.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("iframe")));
+        WebElement frame = thirty.until(ExpectedConditions.visibilityOfElementLocated(By.tagName("iframe")));
         driver.switchTo().frame(frame);
+    }
+
+    @Then("Switch to backoffice frame")
+    public void switchToBoFrame() {
+        switchToFrameBackoffice();
     }
 
     @Then("Switch to default")
@@ -177,14 +181,14 @@ public class stepDefinitions extends BaseClass  {
 //    	driver.get("http://18.202.88.7:8001/trips-ui/faces/login/tripsLogin.xhtml");
 
         //    	SIT link for backoffice
-        driver.get("https://backoffice.mra.mw:8443/trips-ui/faces/login/tripsLogin.xhtml");
+        driver.get(prop.getProperty("NRA_BO_URL"));
     }
 
     @When("^Enters the username \"([^\"]*)\" and password \"([^\"]*)\" to login$")
     public void enters_the_username_something_and_password_something_to_login(String strArg1, String strArg2) throws Throwable {
         driver.findElement(By.id("loginForm:username")).sendKeys(strArg1);
         driver.findElement(By.id("loginForm:password")).sendKeys(strArg2);
-        driver.findElement(By.xpath("//*[@id=\"loginForm:j_idt19\"]/span")).click();
+        driver.findElement(By.id("loginForm:j_idt18")).click();
     }
 
     @Then("^User should be logged in$")
@@ -204,8 +208,7 @@ public class stepDefinitions extends BaseClass  {
     //---------------------------------------------------------------------Verify the Process of Assign Audit Case-----------------------------------------------------------------------------------------------//
     @Given("^Open CRM URL Module as \"([^\"]*)\"$")
     public void open_crm_url_module_as_something(String strArg1) throws Throwable {
-        driver = getDriver();
-        driver.get("https://" + strArg1 + ":Passw0rd@trips-crm.mra.mw:5555/TripsWorkflow/main.aspx");
+        driver.get("http://" + strArg1 + ":Passw0rd@34.241.31.185:5555/TripsWorkflow/main.aspx");
     }
 
     @And("^Close Popup Window$")
@@ -220,7 +223,12 @@ public class stepDefinitions extends BaseClass  {
 
     @And("^Click on Case management dropdown$")
     public void click_on_case_management_dropdown() throws Throwable {
+        switch_to_frame0();
+        thirty.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(),'Active Cases in Progress Overview')]"))).isDisplayed();
+        switchToDefault();
+        Thread.sleep(1000);
         driver.findElement(By.xpath("//*[@id=\"TabCS\"]/a/span")).click();
+        Thread.sleep(1000);
     }
 
 
@@ -271,7 +279,7 @@ public class stepDefinitions extends BaseClass  {
 
     @Then("Open CRM and close modal")
     public void openCRMAndCloseModal() {
-        driver.get(Pro.getProperty("MRA_crm_url_Registration"));
+        driver.get(Pro.getProperty("NRA_CRM_URL"));
         driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         WebElement specificframe = (driver.findElement(By.id(Pro.getProperty("CRM_ExploreCrmWindow_Frame__ID"))));
         driver.switchTo().frame(specificframe);
@@ -488,8 +496,14 @@ public class stepDefinitions extends BaseClass  {
     }
 
     @Then("Save information source")
-    public void saveInformationSource() {
+    public void saveInformationSource() throws InterruptedException {
         twenty.until(ExpectedConditions.visibilityOfElementLocated(By.id("InformationSourceForm:Save"))).click();
+        Thread.sleep(2000);
+    }
+
+    @Then("Click Add Suspect button")
+    public void clickAddSuspectButton() {
+        twenty.until(ExpectedConditions.visibilityOfElementLocated(By.id("InvestigationCase:SelectSuspect"))).click();
     }
 
     @Then("Obtain information source ref number {string}")
@@ -753,6 +767,13 @@ public class stepDefinitions extends BaseClass  {
         twenty.until(ExpectedConditions.visibilityOfElementLocated(By.id("InvestigationCase:SuspicionDescription"))).sendKeys(desc);
     }
 
+
+    @Then("Click Add Information source button")
+    public void ClickAddInformationSourceButton() {
+        twenty.until(ExpectedConditions.visibilityOfElementLocated(By.id("InvestigationCase:SelectSource"))).click();
+        switchToFrameBackoffice();
+    }
+
     @Then("Select Information Source as previously saved")
     public void selectInformationSourceAsPreviouslySaved() throws InterruptedException {
         twenty.until(ExpectedConditions.visibilityOfElementLocated(By.id("InvestigationCase:SelectSource"))).click();
@@ -797,6 +818,310 @@ public class stepDefinitions extends BaseClass  {
         sharedatastep.InvestigationsCaseRef = ReferenceNumber;
         Thread.sleep(2000);
 
+    }
+
+
+    @And("click on Queues")
+    public void clickOnQueues() {
+        driver.findElement(By.xpath("//*[text()='Queues']")).click();
+    }
+
+    @And("enters Investigations reference number in search results")
+    public void entersInvestigationsReferenceNumberInSearchResults() throws InterruptedException {
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+        WebElement search = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("crmGrid_findCriteria")));
+
+        search.clear();
+        Thread.sleep(3000);
+
+//        search.sendKeys("*IN/000036357/2022");
+        search.sendKeys("*"+sharedatastep.InvestigationsCaseRef);
+        Thread.sleep(2000);
+        search.sendKeys(Keys.ENTER);
+
+        Thread.sleep(2000);
+    }
+
+    @And("click checkbox in case number")
+    public void clickCheckbox() throws InterruptedException {
+        Thread.sleep(4000);
+        WebElement pickCheckBox = driver.findElement(By.xpath("//input[@type='checkbox']"));
+
+        Actions actions = new Actions(driver);
+        actions.click(pickCheckBox).perform();
+
+        driver.switchTo().defaultContent();
+    }
+
+    @And("click assign button")
+    public void clickAssignButton() throws InterruptedException {
+//        WebElement assignDropdown = onehundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()=' Assign ']")));
+//        Actions actions = new Actions(driver);
+//        actions.doubleClick(assignDropdown).perform();
+
+        WebElement assignDropdown = sixty.until(ExpectedConditions.visibilityOfElementLocated(By.id("moreCommands")));
+        assignDropdown.click();
+        Thread.sleep(3000);
+        WebElement assignButton = sixty.until(ExpectedConditions.visibilityOfElementLocated(By.id("queueitem|NoRelationship|HomePageGrid|tbg.Mscrm.HomepageGrid.queueitem.Assign")));
+        assignButton.click();
+    }
+
+    @And("^pick the case$")
+    public void pick_the_case() throws Throwable {
+        WebElement pickButton = sixty.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()=' Pick ']")));
+        Actions actions = new Actions(driver);
+        actions.doubleClick(pickButton).perform();
+    }
+
+    @And("^click pick button dropdown$")
+    public void click_pick_button_dropdown() throws Throwable {
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+
+        WebElement assignDropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("moreCommands")));
+        assignDropdown.click();
+
+        WebElement pickButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("queueitem|NoRelationship|HomePageGrid|tbg.queueitem.HomepageGrid.Pick")));
+        pickButton.click();
+    }
+
+    @Then("Assign pop up is displayed")
+    public void assignPopUpIsDisplayed() {
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+        WebElement assignPopup = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("InlineDialog")));
+        Assert.assertTrue(assignPopup.isDisplayed());
+
+        driver.switchTo().frame("InlineDialog_Iframe");
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+
+
+        WebElement popupHeader = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("assignheader_id")));
+        String popupHeaderText = popupHeader.getText();
+        Assert.assertEquals("Assign to Team or User", popupHeaderText);
+    }
+
+    @And("search team to assign")
+    public void searchTeamToAssign() throws InterruptedException {
+        WebElement searchUserTeam = driver.findElement(By.xpath("//*[@id=\"systemuserview_id\"]/div[1]"));
+        searchUserTeam.click();
+
+        Thread.sleep(1000);
+        WebElement searchIcon = driver.findElement(By.id("systemuserview_id_lookupSearch"));
+        searchIcon.click();
+    }
+
+    @And("selects the team {string}")
+    public void selectsTheTeam(String arg0) throws InterruptedException {
+        WebDriverWait wait = new WebDriverWait(driver, 20);
+        WebElement loadMore = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[@title='Look Up More Records']")));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", loadMore);
+        Thread.sleep(500);
+        loadMore.click();
+
+        driver.switchTo().defaultContent();
+        Thread.sleep(500);
+        driver.switchTo().frame("InlineDialog1_Iframe");
+        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+
+        WebElement lookforDropdown = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("selObjects")));
+        lookforDropdown.click();
+        Thread.sleep(3000);
+
+        WebElement team = driver.findElement(By.xpath("//*[text()='User']"));
+        team.click();
+
+
+        String teamName = "BMTO - " + arg0;
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+        ;
+        WebElement teamCheckbox = driver.findElement(By.xpath("//a[contains(@title,'" + arg0 + "')]"));
+        Thread.sleep(2000);
+        teamCheckbox.click();
+
+        WebElement addButton = driver.findElement(By.xpath("//*[text()='Add']"));
+        addButton.click();
+    }
+
+    @And("assigns to the team or user")
+    public void assignsToTheTeamOrUser() {
+        WebElement addButton = driver.findElement(By.xpath("//*[text()='Assign']"));
+        addButton.click();
+    }
+
+    @Then("Click create Investigations case")
+    public void clickCreateInvestigationsCase() {
+        WebElement createInvestigationsPlan = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()=' Create Investigation Case ']")));
+        createInvestigationsPlan.click();
+    }
+
+    @Then("Fill in background information and investigation objectives")
+    public void fillInBackgroundInformationAndInvestigationObjectives() throws Throwable {
+        switch_to_frame1();
+        WebElement loadFrame = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.id("WebResource_InvestigationApplicationAngular")));
+        driver.switchTo().frame(loadFrame);
+        WebElement backgroundInformation = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/trips-app/div/app-investigations/app-new-investigation-case/div/div/form/div[5]/div/div/div[1]/tb-input-text-area/div/div[2]/div/textarea")));
+        Thread.sleep(2000);
+        backgroundInformation.sendKeys("Background Information : "+getRandom(8));
+        Thread.sleep(500);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-new-investigation-case/div/div/form/div[6]/div/div/div[1]/tb-input-text-area/div/div[2]/div/textarea")).sendKeys("Investigation objectives : "+ getRandom(5));
+
+    }
+
+    @Then("Submit Investigation case")
+    public void submitInvestigationCase() {
+        driver.findElement(By.xpath("//button[text()=' Submit ']")).click();
+    }
+
+    @Then("Investigation status should be {string}")
+    public void investigationStatusShouldBe(String Status) throws Throwable {
+        switch_to_frame1();
+        Thread.sleep(3000);
+        String text = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[text()='" + Status + "']"))).getText();
+        Assert.assertEquals(Status, text);
+        Thread.sleep(2000);
+        driver.switchTo().defaultContent();
+    }
+
+    @And("wait for plan to load {string}")
+    public void waitForPlanToLoad(String arg0) {
+        WebDriverWait wait = new WebDriverWait(driver, 200);
+        WebElement frame = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("WebResource_InvestigationApplicationAngular")));
+        driver.switchTo().frame(frame);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='" + arg0 + "']")));
+    }
+
+    @And("clicks Approve from the dropdown")
+    public void clicksApproveFromTheDropdown() throws Throwable {
+        driver.switchTo().defaultContent();
+
+        switch_to_frame1();
+        Thread.sleep(3000);
+
+        driver.findElement(By.xpath("//div[@data-attributename='tbg_approvaloutcome']")).click();
+        Actions action = new Actions(driver);
+        action.sendKeys(Keys.ARROW_DOWN).sendKeys(Keys.ENTER).perform();
+    }
+
+    @And("Click on Save button")
+    public void clickOnSaveButton() throws InterruptedException {
+        Thread.sleep(1000);
+        driver.switchTo().defaultContent();
+        driver.findElement(By.id("tbg_investigationapplication|NoRelationship|Form|Mscrm.Form.tbg_investigationapplication.Save")).click();
+    }
+
+    @And("enters manager comments {string}")
+    public void entersManagerComments(String arg0) throws InterruptedException {
+        WebElement managerCommentsInput = driver.findElement(By.id("tbg_managercomments_cl"));
+        managerCommentsInput.click();
+        Thread.sleep(2000);
+
+        WebElement managerCommentsInputBox = driver.findElement(By.id("tbg_managercomments_i"));
+        managerCommentsInputBox.sendKeys(arg0);
+    }
+
+    @Then("Click create preliminary Investigation findings")
+    public void clickCreatePreliminaryInvestigationFindings() {
+        WebElement createInvestigationsPlan = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()=' Create Preliminary Investigation Findings ']")));
+        createInvestigationsPlan.click();
+    }
+
+    @Then("Click create final Investigation report")
+    public void clickCreateFinalInvestigationReport() {
+        WebElement createInvestigationsPlan = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[text()=' Create Final Investigation Report ']")));
+        createInvestigationsPlan.click();
+    }
+
+    @Then("Add Investigation start date and end date")
+    public void addInvestigationStartDateAndEndDate() throws Throwable {
+        switch_to_frame1();
+        WebElement loadFrame = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.id("WebResource_InvestigationApplicationAngular")));
+        driver.switchTo().frame(loadFrame);
+        twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/trips-app/div/app-investigations/app-preliminary-investigation-findings/div/div/form/div[8]/app-investigation-findings/div/form/div/div[2]/tb-date-picker/div/div[2]/div/p-calendar/span/input"))).sendKeys(todaysDate());
+        actions.sendKeys(Keys.TAB).perform();
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-preliminary-investigation-findings/div/div/form/div[8]/app-investigation-findings/div/form/div/div[3]/tb-date-picker/div/div[2]/div/p-calendar/span/input")).sendKeys(tomorrowsDate());
+        actions.sendKeys(Keys.TAB).perform();
+    }
+
+    @Then("Add visits")
+    public void addVisits() throws InterruptedException {
+        Thread.sleep(1000);
+        driver.findElement(By.xpath("//button[text()='Add']")).click();
+        Thread.sleep(1000);
+        WebElement dateOfVisit = sixty.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-investigation-finding/div/form/div/div[1]/div[1]/tb-date-picker/div/div[2]/div/p-calendar/span/input")));
+        Thread.sleep(1000);
+        dateOfVisit.sendKeys(todaysDate());
+        actions.sendKeys(Keys.TAB).perform();
+        Thread.sleep(400);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-investigation-finding/div/form/div/div[1]/div[1]/tb-input-text-area[1]/div/div[2]/div/textarea")).sendKeys("BOMTO");
+        Thread.sleep(400);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-investigation-finding/div/form/div/div[1]/div[1]/tb-input-text/div/div[2]/div/input")).sendKeys("Maxipain");
+        Thread.sleep(400);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-investigation-finding/div/form/div/div[1]/div[1]/tb-input-text-area[2]/div/div[2]/div/textarea")).sendKeys("Valid");
+        Thread.sleep(200);
+        driver.findElement(By.xpath("//button[text()=' Add']")).click();
+    }
+
+    @Then("Add preliminary findings conclusion")
+    public void addPreliminaryFindingsConclusion() throws InterruptedException {
+        Thread.sleep(1000);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-preliminary-investigation-findings/div/div/form/div[9]/div/div/div[1]/tb-input-text-area/div/div[2]/div/textarea")).sendKeys("Conclusion : "+getRandom(6));
+
+    }
+
+    @And("enters preliminary approver comments {string}")
+    public void entersPreliminaryApproverComments(String arg0) throws InterruptedException {
+        WebElement managerCommentsInput = driver.findElement(By.id("tbg_preliminaryapprovercomments_cl"));
+        managerCommentsInput.click();
+        Thread.sleep(2000);
+
+        WebElement managerCommentsInputBox = driver.findElement(By.id("tbg_preliminaryapprovercomments_i"));
+        managerCommentsInputBox.sendKeys(arg0);
+    }
+
+
+    @Then("Click on manager assessment")
+    public void clickOnManagerAssessment() {
+        driver.findElement(By.xpath("//button[text()='Manage Assessments']")).click();
+    }
+
+    @Then("Enter notes and comments")
+    public void enterNotesAndComments() throws Throwable {
+        switch_to_frame1();
+        WebElement loadFrame = twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.id("WebResource_InvestigationApplicationAngular")));
+        driver.switchTo().frame(loadFrame);
+        twohundred.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/trips-app/div/app-investigations/app-final-investigation-report/div/div/form/div[10]/app-final-investigation-finding/div/form/div/div[2]/tb-input-text-area/div/div[2]/div/textarea"))).sendKeys("Notes : "+getRandom(5));
+        Thread.sleep(500);
+    }
+
+    @Then("Add assessment for PAYE")
+    public void addAssessmentForPAYE() throws InterruptedException {
+        driver.findElement(By.xpath("//button[text()=' Add ']")).click();
+        Thread.sleep(1000);
+
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-officer-assessment/div/form/div[1]/div/tb-dropdown/div/div[2]/div/p-dropdown/div/label")).click();
+        Thread.sleep(500);
+        driver.findElement(By.xpath("//li[span='Pay As You Earn']")).click();
+        Thread.sleep(500);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-officer-assessment/div/form/div[1]/div/tb-input-text[1]/div/div[2]/div/input")).sendKeys("2019-2020");
+        Thread.sleep(500);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-officer-assessment/div/form/div[1]/div/tb-input-text[2]/div/div[2]/div/input")).sendKeys("Particulars");
+        Thread.sleep(500);
+        driver.findElement(By.xpath("/html/body/trips-app/div/app-investigations/app-add-update-officer-assessment/div/form/div[1]/div/tb-png-input-number[1]/div/div[2]/div/span/input")).sendKeys("12000");
+        Thread.sleep(500);
+        driver.findElement(By.xpath("//button[text()=' Add ']")).click();
+        Thread.sleep(1000);
+//        driver.findElement(By.xpath("//button[text()=' Ok ']")).click();
+        driver.findElement(By.xpath("//button[text()=' Cancel ']")).click();
+
+    }
+
+    @And("enters approval notes {string}")
+    public void entersApprovalNotes(String arg0) throws InterruptedException {
+        WebElement managerCommentsInput = driver.findElement(By.id("tbg_outcomenotes_cl"));
+        managerCommentsInput.click();
+        Thread.sleep(2000);
+
+        WebElement managerCommentsInputBox = driver.findElement(By.id("tbg_outcomenotes_i"));
+        managerCommentsInputBox.sendKeys(arg0);
     }
 }
 
