@@ -1123,6 +1123,11 @@ public class stepDefinitions extends BaseClass  {
         WebElement managerCommentsInputBox = driver.findElement(By.id("tbg_outcomenotes_i"));
         managerCommentsInputBox.sendKeys(arg0);
     }
+
+    @And("clicks Review from the dropdown")
+    public void clicksReviewFromTheDropdown() {
+
+    }
 }
 
 
